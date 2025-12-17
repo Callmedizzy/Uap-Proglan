@@ -26,6 +26,25 @@ public class Purchase {
     public Purchase() {
     }
 
+    public Purchase(Purchase other) {
+        this.ref = other.ref;
+        this.eventName = other.eventName;
+        this.ticketType = other.ticketType;
+        this.customerName = other.customerName;
+        this.customerEmail = other.customerEmail;
+        this.customerPhone = other.customerPhone;
+        this.paymentMethod = other.paymentMethod;
+        this.status = other.status;
+        this.checkInStatus = other.checkInStatus;
+        this.totalPaid = other.totalPaid;
+        this.createdAt = other.createdAt;
+        this.updatedAt = other.updatedAt;
+        this.paymentType = other.paymentType;
+        this.bank = other.bank;
+        this.quantity = other.quantity;
+        this.exportedAt = other.exportedAt;
+    }
+
     public Purchase(String ref, String eventName, String ticketType, String customerName, String customerEmail,
                     String customerPhone, String paymentMethod, String status, String checkInStatus, long totalPaid,
                     LocalDateTime createdAt, LocalDateTime updatedAt, String paymentType, String bank, int quantity,
@@ -174,6 +193,10 @@ public class Purchase {
 
     public void setExportedAt(LocalDateTime exportedAt) {
         this.exportedAt = exportedAt;
+    }
+
+    public Purchase copy() {
+        return new Purchase(this);
     }
 
     public String[] toCsvRow() {

@@ -83,7 +83,7 @@ public class HistoryPanel extends JPanel {
     }
 
     public void refresh() {
-        List<Purchase> data = service.getAll();
+        List<Purchase> data = service.getHistory();
         long totalAll = 0L;
         long totalRegular = 0L;
         long totalVip = 0L;
@@ -111,7 +111,11 @@ public class HistoryPanel extends JPanel {
         totalRegularCard.setValue(formatCurrency(totalRegular));
         totalVipCard.setValue(formatCurrency(totalVip));
         paidCard.setValue(String.valueOf(paidCount));
-        lastUpdateLabel.setText("Update terakhir: " + DateUtil.formatDateTime(lastUpdate));
+        if (data.isEmpty()) {
+            lastUpdateLabel.setText("Belum ada riwayat.");
+        } else {
+            lastUpdateLabel.setText("Update terakhir: " + DateUtil.formatDateTime(lastUpdate));
+        }
 
         List<Purchase> recent = new ArrayList<>(data);
         recent.sort(Comparator.comparing(Purchase::getUpdatedAt, Comparator.nullsLast(Comparator.naturalOrder()))

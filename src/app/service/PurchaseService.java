@@ -13,10 +13,12 @@ import java.util.Random;
 public class PurchaseService {
     private final PurchaseRepository repository;
     private final List<Purchase> purchases;
+    private final List<Purchase> history;
 
     public PurchaseService(PurchaseRepository repository) {
         this.repository = repository;
         this.purchases = new ArrayList<>();
+        this.history = new ArrayList<>();
     }
 
     public void load() throws IOException {
@@ -26,6 +28,10 @@ public class PurchaseService {
 
     public List<Purchase> getAll() {
         return new ArrayList<>(purchases);
+    }
+
+    public List<Purchase> getHistory() {
+        return new ArrayList<>(history);
     }
 
     public Purchase findByRef(String ref) {
@@ -53,6 +59,7 @@ public class PurchaseService {
         purchase.setUpdatedAt(LocalDateTime.now());
         purchases.add(purchase);
         repository.save(purchases);
+        history.add(purchase.copy());
     }
 
     public void update(Purchase purchase) throws IOException {

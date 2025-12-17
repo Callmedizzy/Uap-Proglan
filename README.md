@@ -27,7 +27,7 @@ java -cp out app.Main
 - Dashboard: ringkasan total transaksi dan pendapatan.
 - List Data: tabel dengan sorting, searching, edit, delete.
 - Input Data: form tambah/edit dengan validasi.
-- History/Report: ringkasan total dan daftar transaksi terbaru.
+- History/Report: ringkasan dan daftar transaksi yang baru ditambahkan selama aplikasi berjalan.
 - Persistensi CSV: data tersimpan di `data/history.csv`.
 
 ## Catatan Data
