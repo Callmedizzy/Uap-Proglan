@@ -24,8 +24,6 @@ import java.time.LocalDateTime;
 public class FormPanel extends JPanel {
     private final PurchaseService service;
     private final Runnable onSaved;
-    private final Runnable onCancel;
-
     private final JLabel titleLabel;
     private final JTextField refField;
     private final JTextField eventField;
@@ -49,8 +47,6 @@ public class FormPanel extends JPanel {
     public FormPanel(PurchaseService service, Runnable onSaved, Runnable onCancel) {
         this.service = service;
         this.onSaved = onSaved;
-        this.onCancel = onCancel;
-
         setLayout(new BorderLayout());
         setBackground(Theme.BG);
 
@@ -256,7 +252,7 @@ public class FormPanel extends JPanel {
     }
 
     private void addRow(JPanel panel, int row, String leftLabel, java.awt.Component leftField,
-                        String rightLabel, java.awt.Component rightField) {
+            String rightLabel, java.awt.Component rightField) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 2, 6, 12);
         gbc.anchor = GridBagConstraints.WEST;

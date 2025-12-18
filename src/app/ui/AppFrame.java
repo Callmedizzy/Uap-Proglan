@@ -18,7 +18,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
 
 public class AppFrame extends JFrame {
     private final PurchaseService service;
