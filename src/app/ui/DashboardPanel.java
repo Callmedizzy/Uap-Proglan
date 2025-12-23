@@ -28,7 +28,7 @@ public class DashboardPanel extends JPanel {
 
         GradientPanel header = new GradientPanel(new Color(232, 201, 173), new Color(246, 232, 216));
         header.setLayout(new BorderLayout());
-        header.setBorder(new EmptyBorder(20, 22, 20, 22));
+        header.setBorder(new EmptyBorder(14, 18, 14, 18));
 
         JLabel title = new JLabel("Dashboard");
         title.setFont(Theme.TITLE_FONT);
@@ -48,9 +48,9 @@ public class DashboardPanel extends JPanel {
 
         JPanel body = new JPanel(new BorderLayout());
         body.setBackground(Theme.BG);
-        body.setBorder(new EmptyBorder(20, 22, 20, 22));
+        body.setBorder(new EmptyBorder(14, 18, 14, 18));
 
-        JPanel cards = new JPanel(new GridLayout(2, 2, 16, 16));
+        JPanel cards = new JPanel(new GridLayout(2, 2, 12, 12));
         cards.setOpaque(false);
 
         totalCard = new InfoCard("Total Transaksi", Theme.ACCENT);

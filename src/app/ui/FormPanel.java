@@ -53,12 +53,12 @@ public class FormPanel extends JPanel {
         titleLabel = new JLabel("Input Data");
         titleLabel.setFont(Theme.SUBTITLE_FONT);
         titleLabel.setForeground(Theme.TEXT_DARK);
-        titleLabel.setBorder(new EmptyBorder(18, 22, 8, 22));
+        titleLabel.setBorder(new EmptyBorder(14, 18, 6, 18));
         add(titleLabel, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(Theme.BG);
-        form.setBorder(new EmptyBorder(8, 22, 8, 22));
+        form.setBorder(new EmptyBorder(6, 18, 6, 18));
 
         refField = new JTextField();
         eventField = new JTextField();
@@ -114,7 +114,7 @@ public class FormPanel extends JPanel {
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 12));
         actions.setBackground(Theme.BG);
-        actions.setBorder(BorderFactory.createEmptyBorder(0, 22, 10, 22));
+        actions.setBorder(BorderFactory.createEmptyBorder(0, 18, 8, 18));
 
         JButton saveBtn = new JButton("Simpan");
         Theme.stylePrimaryButton(saveBtn);
@@ -254,7 +254,7 @@ public class FormPanel extends JPanel {
     private void addRow(JPanel panel, int row, String leftLabel, java.awt.Component leftField,
             String rightLabel, java.awt.Component rightField) {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 2, 6, 12);
+        gbc.insets = new Insets(4, 2, 4, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;

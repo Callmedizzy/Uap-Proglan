@@ -7,16 +7,22 @@ import app.service.PurchaseService;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AppFrame extends JFrame {
@@ -31,7 +37,7 @@ public class AppFrame extends JFrame {
     public AppFrame() {
         super("E-Ticket Manager");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 720);
+        setSize(1080, 660);
         setLocationRelativeTo(null);
 
         PurchaseRepository repository = new PurchaseRepository(Paths.get("data", "history.csv"));
@@ -71,22 +77,13 @@ public class AppFrame extends JFrame {
         JPanel side = new JPanel();
         side.setBackground(Theme.SIDEBAR);
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
-        side.setPreferredSize(new Dimension(210, 0));
-        side.setBorder(BorderFactory.createEmptyBorder(18, 12, 18, 12));
+        side.setPreferredSize(new Dimension(190, 0));
+        side.setBorder(BorderFactory.createEmptyBorder(16, 12, 16, 12));
 
-        JLabel title = new JLabel("E-TICKET");
-        title.setForeground(Theme.TEXT_LIGHT);
-        title.setFont(Theme.SUBTITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel subtitle = new JLabel("Ticket Purchase");
-        subtitle.setForeground(Theme.TEXT_LIGHT);
-        subtitle.setFont(Theme.BODY_FONT);
-        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        side.add(title);
-        side.add(subtitle);
-        side.add(Box.createVerticalStrut(20));
+        JPanel brand = buildBrandPanel();
+        brand.setAlignmentX(Component.LEFT_ALIGNMENT);
+        side.add(brand);
+        side.add(Box.createVerticalStrut(18));
 
         JButton dashboardBtn = navButton("Dashboard", e -> showDashboard());
         JButton listBtn = navButton("List Data", e -> showList());
@@ -108,6 +105,58 @@ public class AppFrame extends JFrame {
         side.add(Box.createVerticalGlue());
 
         return side;
+    }
+
+    private JPanel buildBrandPanel() {
+        JPanel brand = new JPanel(new BorderLayout(10, 0));
+        brand.setOpaque(false);
+
+        JLabel logoLabel = new JLabel();
+        logoLabel.setPreferredSize(new Dimension(46, 46));
+        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        Icon logoIcon = loadLogoIcon();
+        if (logoIcon != null) {
+            logoLabel.setIcon(logoIcon);
+        } else {
+            logoLabel.setIcon(IconFactory.letterIcon("E", Theme.ACCENT_GREEN, Theme.TEXT_LIGHT));
+        }
+
+        JPanel textWrap = new JPanel();
+        textWrap.setOpaque(false);
+        textWrap.setLayout(new BoxLayout(textWrap, BoxLayout.Y_AXIS));
+
+        JLabel title = new JLabel("E-TICKET");
+        title.setForeground(Theme.TEXT_LIGHT);
+        title.setFont(Theme.SUBTITLE_FONT);
+
+        JLabel subtitle = new JLabel("Ticket Purchase");
+        subtitle.setForeground(Theme.TEXT_LIGHT);
+        subtitle.setFont(Theme.BODY_FONT);
+
+        JLabel crew = new JLabel("ketenganan jiwa");
+        crew.setForeground(Theme.TEXT_LIGHT);
+        crew.setFont(Theme.SMALL_FONT);
+
+        textWrap.add(title);
+        textWrap.add(subtitle);
+        textWrap.add(crew);
+
+        brand.add(logoLabel, BorderLayout.WEST);
+        brand.add(textWrap, BorderLayout.CENTER);
+        return brand;
+    }
+
+    private Icon loadLogoIcon() {
+        Path logoPath = Paths.get("resources", "images", "logo.png");
+        if (!Files.exists(logoPath)) {
+            return null;
+        }
+        ImageIcon icon = new ImageIcon(logoPath.toString());
+        if (icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0) {
+            return null;
+        }
+        Image scaled = icon.getImage().getScaledInstance(42, 42, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
     }
 
     private JButton navButton(String label, java.awt.event.ActionListener listener) {

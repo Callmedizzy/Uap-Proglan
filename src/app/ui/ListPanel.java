@@ -6,6 +6,7 @@ import app.service.PurchaseService;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -19,7 +20,12 @@ import javax.swing.table.TableRowSorter;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -44,7 +50,7 @@ public class ListPanel extends JPanel {
 
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Theme.BG);
-        header.setBorder(BorderFactory.createEmptyBorder(16, 22, 8, 22));
+        header.setBorder(BorderFactory.createEmptyBorder(14, 18, 6, 18));
 
         JLabel title = new JLabel("List Data Purchase");
         title.setFont(Theme.SUBTITLE_FONT);
@@ -58,7 +64,7 @@ public class ListPanel extends JPanel {
 
         JPanel controls = new JPanel(new GridLayout(2, 1, 0, 6));
         controls.setBackground(Theme.BG);
-        controls.setBorder(BorderFactory.createEmptyBorder(0, 22, 10, 22));
+        controls.setBorder(BorderFactory.createEmptyBorder(0, 18, 8, 18));
 
         JPanel searchRow = new JPanel(new BorderLayout(8, 0));
         searchRow.setBackground(Theme.BG);
@@ -99,7 +105,7 @@ public class ListPanel extends JPanel {
         tableModel = new PurchaseTableModel();
         table = new JTable(tableModel);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        table.setRowHeight(22);
+        table.setRowHeight(20);
         table.setFont(Theme.BODY_FONT);
         table.getTableHeader().setFont(Theme.BODY_BOLD);
         table.getTableHeader().setBackground(Theme.CARD);
@@ -108,12 +114,12 @@ public class ListPanel extends JPanel {
         table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 22, 0, 22));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
         actions.setBackground(Theme.BG);
-        actions.setBorder(BorderFactory.createEmptyBorder(0, 22, 10, 22));
+        actions.setBorder(BorderFactory.createEmptyBorder(0, 18, 8, 18));
 
         JButton addBtn = new JButton("Tambah");
         Theme.stylePrimaryButton(addBtn);
@@ -131,9 +137,14 @@ public class ListPanel extends JPanel {
         Theme.styleSecondaryButton(refreshBtn);
         refreshBtn.addActionListener(e -> reloadData());
 
+        JButton exportBtn = new JButton("Download CSV");
+        Theme.styleSecondaryButton(exportBtn);
+        exportBtn.addActionListener(e -> exportData());
+
         actions.add(addBtn);
         actions.add(editBtn);
         actions.add(deleteBtn);
+        actions.add(exportBtn);
         actions.add(refreshBtn);
 
         add(actions, BorderLayout.SOUTH);
@@ -250,6 +261,54 @@ public class ListPanel extends JPanel {
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void exportData() {
+        List<Purchase> data = collectVisibleData();
+        if (data.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tidak ada data untuk di-download.");
+            return;
+        }
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Simpan Data CSV");
+        chooser.setSelectedFile(new File(buildExportFileName()));
+        int result = chooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        Path path = chooser.getSelectedFile().toPath();
+        String fileName = path.toString();
+        if (!fileName.toLowerCase().endsWith(".csv")) {
+            path = Path.of(fileName + ".csv");
+        }
+        try {
+            service.exportTo(path, data);
+            JOptionPane.showMessageDialog(this, "Data berhasil disimpan:\n" + path.getFileName());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Gagal menyimpan data: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private List<Purchase> collectVisibleData() {
+        List<Purchase> data = new ArrayList<>();
+        int rowCount = table.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            int modelRow = table.convertRowIndexToModel(i);
+            Purchase purchase = tableModel.getAt(modelRow);
+            if (purchase != null) {
+                data.add(purchase);
+            }
+        }
+        return data;
+    }
+
+    private String buildExportFileName() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
+        String stamp = LocalDateTime.now().format(formatter);
+        return "eticket_data_" + stamp + ".csv";
     }
 }
 

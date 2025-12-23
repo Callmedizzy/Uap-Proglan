@@ -13,7 +13,7 @@ public class InfoCard extends JPanel {
     public InfoCard(String title, Color accent) {
         setLayout(new BorderLayout());
         setBackground(Theme.CARD);
-        setBorder(new EmptyBorder(12, 14, 12, 14));
+        setBorder(new EmptyBorder(10, 12, 10, 12));
 
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(Theme.BODY_BOLD);

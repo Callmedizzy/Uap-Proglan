@@ -10,7 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 public final class IconFactory {
-    private static final int SIZE = 18;
+    private static final int SIZE = 16;
 
     private IconFactory() {
     }
@@ -52,7 +52,7 @@ public final class IconFactory {
             g2.fillRoundRect(x, y, SIZE, SIZE, 6, 6);
 
             g2.setColor(foreground);
-            g2.setFont(new Font("Trebuchet MS", Font.BOLD, 11));
+            g2.setFont(new Font("Trebuchet MS", Font.BOLD, 10));
             FontMetrics metrics = g2.getFontMetrics();
             int textWidth = metrics.stringWidth(letter);
             int textHeight = metrics.getAscent();

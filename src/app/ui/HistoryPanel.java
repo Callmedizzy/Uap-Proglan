@@ -34,7 +34,7 @@ public class HistoryPanel extends JPanel {
 
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Theme.BG);
-        header.setBorder(new EmptyBorder(16, 22, 8, 22));
+        header.setBorder(new EmptyBorder(14, 18, 6, 18));
 
         JLabel title = new JLabel("History & Report");
         title.setFont(Theme.SUBTITLE_FONT);
@@ -48,9 +48,9 @@ public class HistoryPanel extends JPanel {
 
         add(header, BorderLayout.NORTH);
 
-        JPanel summary = new JPanel(new GridLayout(1, 4, 12, 12));
+        JPanel summary = new JPanel(new GridLayout(1, 4, 10, 10));
         summary.setBackground(Theme.BG);
-        summary.setBorder(new EmptyBorder(4, 22, 12, 22));
+        summary.setBorder(new EmptyBorder(4, 18, 10, 18));
 
         totalAllCard = new InfoCard("Total Semua", Theme.ACCENT);
         totalRegularCard = new InfoCard("Total Regular", Theme.ACCENT_GREEN);
@@ -64,13 +64,13 @@ public class HistoryPanel extends JPanel {
 
         tableModel = new HistoryTableModel();
         JTable table = new JTable(tableModel);
-        table.setRowHeight(22);
+        table.setRowHeight(20);
         table.setFont(Theme.BODY_FONT);
         table.getTableHeader().setFont(Theme.BODY_BOLD);
         table.getTableHeader().setBackground(Theme.CARD);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 22, 14, 22));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 18, 12, 18));
 
         JPanel content = new JPanel(new BorderLayout());
         content.setBackground(Theme.BG);

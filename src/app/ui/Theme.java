@@ -18,10 +18,11 @@ public final class Theme {
     public static final Color TEXT_LIGHT = new Color(248, 243, 236);
     public static final Color BUTTON_LIGHT = new Color(239, 220, 201);
 
-    public static final Font TITLE_FONT = new Font("Georgia", Font.BOLD, 24);
-    public static final Font SUBTITLE_FONT = new Font("Georgia", Font.BOLD, 16);
-    public static final Font BODY_FONT = new Font("Trebuchet MS", Font.PLAIN, 13);
-    public static final Font BODY_BOLD = new Font("Trebuchet MS", Font.BOLD, 13);
+    public static final Font TITLE_FONT = new Font("Georgia", Font.BOLD, 21);
+    public static final Font SUBTITLE_FONT = new Font("Georgia", Font.BOLD, 15);
+    public static final Font BODY_FONT = new Font("Trebuchet MS", Font.PLAIN, 12);
+    public static final Font BODY_BOLD = new Font("Trebuchet MS", Font.BOLD, 12);
+    public static final Font SMALL_FONT = new Font("Trebuchet MS", Font.PLAIN, 11);
 
     private Theme() {
     }
@@ -31,7 +32,7 @@ public final class Theme {
         button.setFont(BODY_BOLD);
         button.setForeground(TEXT_LIGHT);
         button.setBackground(SIDEBAR_DARK);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
         button.setFocusPainted(false);
         button.setContentAreaFilled(true);
         button.setOpaque(true);
@@ -46,7 +47,7 @@ public final class Theme {
         button.setFont(BODY_BOLD);
         button.setForeground(TEXT_LIGHT);
         button.setBackground(ACCENT);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
         button.setFocusPainted(false);
         button.setContentAreaFilled(true);
         button.setOpaque(true);
@@ -59,7 +60,9 @@ public final class Theme {
         button.setFont(BODY_BOLD);
         button.setForeground(TEXT_DARK);
         button.setBackground(BUTTON_LIGHT);
-        button.setBorder(BorderFactory.createLineBorder(ACCENT, 1));
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ACCENT, 1),
+                BorderFactory.createEmptyBorder(6, 12, 6, 12)));
         button.setFocusPainted(false);
         button.setContentAreaFilled(true);
         button.setOpaque(true);

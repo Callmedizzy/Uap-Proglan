@@ -4,6 +4,7 @@ import app.model.Purchase;
 import app.repository.PurchaseRepository;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -93,6 +94,11 @@ public class PurchaseService {
         List<Purchase> sorted = new ArrayList<>(purchases);
         sorted.sort(comparator);
         return sorted;
+    }
+
+    public void exportTo(Path path, List<Purchase> data) throws IOException {
+        PurchaseRepository exporter = new PurchaseRepository(path);
+        exporter.save(data);
     }
 
     public static Comparator<Purchase> sortByCreatedAt() {
