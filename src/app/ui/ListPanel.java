@@ -14,8 +14,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableRowSorter;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -271,22 +273,25 @@ public class ListPanel extends JPanel {
         }
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Simpan Data CSV");
+        chooser.setFileFilter(new FileNameExtensionFilter("CSV (*.csv)", "csv"));
+        chooser.setCurrentDirectory(new File("data"));
         chooser.setSelectedFile(new File(buildExportFileName()));
-        int result = chooser.showSaveDialog(this);
+        int result = chooser.showSaveDialog(SwingUtilities.getWindowAncestor(this));
         if (result != JFileChooser.APPROVE_OPTION) {
             return;
         }
-        Path path = chooser.getSelectedFile().toPath();
-        String fileName = path.toString();
-        if (!fileName.toLowerCase().endsWith(".csv")) {
-            path = Path.of(fileName + ".csv");
-        }
+        File selected = chooser.getSelectedFile();
         try {
+            if (selected == null) {
+                JOptionPane.showMessageDialog(this, "Lokasi simpan tidak valid.");
+                return;
+            }
+            Path path = resolveExportPath(selected);
             service.exportTo(path, data);
-            JOptionPane.showMessageDialog(this, "Data berhasil disimpan:\n" + path.getFileName());
-        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Data berhasil disimpan:\n" + path.toAbsolutePath());
+        } catch (IOException | RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
-                    "Gagal menyimpan data: " + ex.getMessage(),
+                    "Gagal menyimpan data: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -309,6 +314,21 @@ public class ListPanel extends JPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
         String stamp = LocalDateTime.now().format(formatter);
         return "eticket_data_" + stamp + ".csv";
+    }
+
+    private Path resolveExportPath(File selected) {
+        Path dataDir = Path.of("data");
+        if (selected == null || selected.isDirectory()) {
+            return dataDir.resolve(buildExportFileName());
+        }
+        String name = selected.getName();
+        if (name == null || name.trim().isEmpty()) {
+            return dataDir.resolve(buildExportFileName());
+        }
+        if (!name.toLowerCase().endsWith(".csv")) {
+            name = name + ".csv";
+        }
+        return dataDir.resolve(name);
     }
 }
 
