@@ -1,12 +1,12 @@
 package app.ui;
 
 import app.model.Purchase;
+import app.repository.PurchaseRepository;
 import app.service.PurchaseService;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -14,15 +14,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableRowSorter;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -271,23 +268,10 @@ public class ListPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Tidak ada data untuk di-download.");
             return;
         }
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Simpan Data CSV");
-        chooser.setFileFilter(new FileNameExtensionFilter("CSV (*.csv)", "csv"));
-        chooser.setCurrentDirectory(new File("data"));
-        chooser.setSelectedFile(new File(buildExportFileName()));
-        int result = chooser.showSaveDialog(SwingUtilities.getWindowAncestor(this));
-        if (result != JFileChooser.APPROVE_OPTION) {
-            return;
-        }
-        File selected = chooser.getSelectedFile();
         try {
-            if (selected == null) {
-                JOptionPane.showMessageDialog(this, "Lokasi simpan tidak valid.");
-                return;
-            }
-            Path path = resolveExportPath(selected);
-            service.exportTo(path, data);
+            Path path = Path.of("data", buildExportFileName());
+            PurchaseRepository exporter = new PurchaseRepository(path);
+            exporter.save(data);
             JOptionPane.showMessageDialog(this, "Data berhasil disimpan:\n" + path.toAbsolutePath());
         } catch (IOException | RuntimeException ex) {
             JOptionPane.showMessageDialog(this,
@@ -314,21 +298,6 @@ public class ListPanel extends JPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
         String stamp = LocalDateTime.now().format(formatter);
         return "eticket_data_" + stamp + ".csv";
-    }
-
-    private Path resolveExportPath(File selected) {
-        Path dataDir = Path.of("data");
-        if (selected == null || selected.isDirectory()) {
-            return dataDir.resolve(buildExportFileName());
-        }
-        String name = selected.getName();
-        if (name == null || name.trim().isEmpty()) {
-            return dataDir.resolve(buildExportFileName());
-        }
-        if (!name.toLowerCase().endsWith(".csv")) {
-            name = name + ".csv";
-        }
-        return dataDir.resolve(name);
     }
 }
 
