@@ -83,14 +83,15 @@ public class HistoryPanel extends JPanel {
     }
 
     public void refresh() {
-        List<Purchase> data = service.getHistory();
+        List<Purchase> allData = service.getAll();
+        List<Purchase> historyData = service.getHistory();
         long totalAll = 0L;
         long totalRegular = 0L;
         long totalVip = 0L;
         int paidCount = 0;
         LocalDateTime lastUpdate = null;
 
-        for (Purchase purchase : data) {
+        for (Purchase purchase : allData) {
             totalAll += purchase.getTotalPaid();
             String type = purchase.getTicketType();
             if (type != null && type.equalsIgnoreCase("REGULAR")) {
@@ -111,13 +112,15 @@ public class HistoryPanel extends JPanel {
         totalRegularCard.setValue(formatCurrency(totalRegular));
         totalVipCard.setValue(formatCurrency(totalVip));
         paidCard.setValue(String.valueOf(paidCount));
-        if (data.isEmpty()) {
+        if (allData.isEmpty()) {
             lastUpdateLabel.setText("Belum ada riwayat.");
+        } else if (historyData.isEmpty()) {
+            lastUpdateLabel.setText("Belum ada riwayat baru. Update terakhir: " + DateUtil.formatDateTime(lastUpdate));
         } else {
             lastUpdateLabel.setText("Update terakhir: " + DateUtil.formatDateTime(lastUpdate));
         }
 
-        List<Purchase> recent = new ArrayList<>(data);
+        List<Purchase> recent = new ArrayList<>(historyData);
         recent.sort(Comparator.comparing(Purchase::getUpdatedAt, Comparator.nullsLast(Comparator.naturalOrder()))
                 .reversed());
         if (recent.size() > 10) {
