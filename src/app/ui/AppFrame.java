@@ -2,6 +2,7 @@ package app.ui;
 
 import app.model.Purchase;
 import app.repository.PurchaseRepository;
+import app.service.MemberAccountService;
 import app.service.PurchaseService;
 
 import javax.swing.BorderFactory;
@@ -31,7 +32,9 @@ public class AppFrame extends JFrame {
     private final JPanel rootPanel;
     private final JPanel adminPanel;
     private final LoginPanel loginPanel;
+    private final SignupPanel signupPanel;
     private final MemberPanel memberPanel;
+    private final MemberAccountService accountService;
 
     public AppFrame() {
         super("E-Ticket Manager");
@@ -46,6 +49,16 @@ public class AppFrame extends JFrame {
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
                     "Gagal membaca data CSV: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        accountService = new MemberAccountService(Paths.get("data", "members.csv"));
+        try {
+            accountService.load();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Gagal membaca data akun: " + ex.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -68,11 +81,13 @@ public class AppFrame extends JFrame {
         adminPanel.add(adminContentPanel, BorderLayout.CENTER);
 
         memberPanel = new MemberPanel(service, this::onMemberSaved, this::showLogin);
-        loginPanel = new LoginPanel(this::handleLogin);
+        signupPanel = new SignupPanel(accountService, this::handleSignupSuccess, this::showLogin);
+        loginPanel = new LoginPanel(accountService, this::handleLogin, this::showSignup);
 
         rootLayout = new CardLayout();
         rootPanel = new JPanel(rootLayout);
         rootPanel.add(loginPanel, "login");
+        rootPanel.add(signupPanel, "signup");
         rootPanel.add(adminPanel, "admin");
         rootPanel.add(memberPanel, "member");
         setContentPane(rootPanel);
@@ -174,6 +189,17 @@ public class AppFrame extends JFrame {
         rootLayout.show(rootPanel, "login");
     }
 
+    private void showLoginWithName(String name) {
+        loginPanel.reset();
+        loginPanel.prefillName(name);
+        rootLayout.show(rootPanel, "login");
+    }
+
+    private void showSignup() {
+        signupPanel.reset();
+        rootLayout.show(rootPanel, "signup");
+    }
+
     private void showAdmin() {
         rootLayout.show(rootPanel, "admin");
         showDashboard();
@@ -191,6 +217,10 @@ public class AppFrame extends JFrame {
             memberPanel.prepareFor(username);
             showMember();
         }
+    }
+
+    private void handleSignupSuccess(String name) {
+        showLoginWithName(name);
     }
 
     private void onMemberSaved() {

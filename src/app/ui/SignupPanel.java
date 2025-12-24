@@ -21,40 +21,24 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.function.BiConsumer;
+import java.io.IOException;
+import java.util.function.Consumer;
 
-public class LoginPanel extends JPanel {
-    public enum Role {
-        ADMIN("Admin"),
-        MEMBER("Anggota");
-
-        private final String label;
-
-        Role(String label) {
-            this.label = label;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-    }
-
-    private static final String ADMIN_USER = "admin";
-    private static final String ADMIN_PASS = "admin123";
+public class SignupPanel extends JPanel {
     private static final int INPUT_WIDTH = 340;
     private static final int INPUT_HEIGHT = 34;
 
     private final MemberAccountService accountService;
-    private final BiConsumer<Role, String> onLogin;
-    private final Runnable onSignup;
+    private final Consumer<String> onSuccess;
+    private final Runnable onBack;
     private final JTextField nameField;
     private final JPasswordField passwordField;
+    private final JPasswordField confirmField;
 
-    public LoginPanel(MemberAccountService accountService, BiConsumer<Role, String> onLogin, Runnable onSignup) {
+    public SignupPanel(MemberAccountService accountService, Consumer<String> onSuccess, Runnable onBack) {
         this.accountService = accountService;
-        this.onLogin = onLogin;
-        this.onSignup = onSignup;
+        this.onSuccess = onSuccess;
+        this.onBack = onBack;
         setLayout(new BorderLayout());
         setBackground(Theme.BG);
 
@@ -68,14 +52,14 @@ public class LoginPanel extends JPanel {
                 BorderFactory.createLineBorder(Theme.ACCENT, 1, true),
                 new EmptyBorder(26, 32, 26, 32)));
         card.setLayout(new GridBagLayout());
-        card.setPreferredSize(new Dimension(420, 350));
+        card.setPreferredSize(new Dimension(420, 370));
 
-        JLabel title = new JLabel("Selamat Datang");
+        JLabel title = new JLabel("Daftar Akun Anggota");
         title.setFont(Theme.TITLE_FONT);
         title.setForeground(Theme.TEXT_DARK);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("Silakan login dengan akun kamu");
+        JLabel subtitle = new JLabel("Isi data untuk membuat akun baru");
         subtitle.setFont(Theme.BODY_FONT);
         subtitle.setForeground(Theme.TEXT_DARK);
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -94,56 +78,59 @@ public class LoginPanel extends JPanel {
         JPanel form = new JPanel(new GridBagLayout());
         form.setOpaque(false);
         form.setAlignmentX(Component.CENTER_ALIGNMENT);
-        form.setMaximumSize(new Dimension(INPUT_WIDTH, 160));
-        form.setPreferredSize(new Dimension(INPUT_WIDTH, 160));
+        form.setMaximumSize(new Dimension(INPUT_WIDTH, 200));
+        form.setPreferredSize(new Dimension(INPUT_WIDTH, 200));
 
         nameField = new JTextField(24);
         passwordField = new JPasswordField(24);
+        confirmField = new JPasswordField(24);
         styleField(nameField);
         styleField(passwordField);
+        styleField(confirmField);
 
         addFormRow(form, 0, buildField("Nama", nameField));
         addFormRow(form, 1, buildField("Password", passwordField));
+        addFormRow(form, 2, buildField("Konfirmasi", confirmField));
 
         cardGbc.gridy = 2;
         cardGbc.insets = new Insets(0, 0, 18, 0);
         card.add(form, cardGbc);
 
-        JButton loginBtn = new JButton("Login Sekarang");
-        Theme.stylePrimaryButton(loginBtn);
-        loginBtn.setMaximumSize(new Dimension(INPUT_WIDTH, 38));
-        loginBtn.setPreferredSize(new Dimension(INPUT_WIDTH, 38));
-        loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loginBtn.addActionListener(e -> attemptLogin());
-        passwordField.addActionListener(e -> attemptLogin());
+        JButton signupBtn = new JButton("Daftar");
+        Theme.stylePrimaryButton(signupBtn);
+        signupBtn.setMaximumSize(new Dimension(INPUT_WIDTH, 38));
+        signupBtn.setPreferredSize(new Dimension(INPUT_WIDTH, 38));
+        signupBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        signupBtn.addActionListener(e -> attemptSignup());
+        confirmField.addActionListener(e -> attemptSignup());
 
         cardGbc.gridy = 3;
         cardGbc.insets = new Insets(0, 0, 0, 0);
-        card.add(loginBtn, cardGbc);
+        card.add(signupBtn, cardGbc);
 
-        JPanel signupRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
-        signupRow.setOpaque(false);
+        JPanel backRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        backRow.setOpaque(false);
 
-        JLabel signupLabel = new JLabel("Belum punya akun?");
-        signupLabel.setFont(Theme.BODY_FONT.deriveFont(11f));
-        signupLabel.setForeground(Theme.TEXT_DARK);
+        JLabel backLabel = new JLabel("Sudah punya akun?");
+        backLabel.setFont(Theme.BODY_FONT.deriveFont(11f));
+        backLabel.setForeground(Theme.TEXT_DARK);
 
-        JButton signupBtn = new JButton("Daftar");
-        signupBtn.setFont(Theme.BODY_FONT.deriveFont(11f));
-        signupBtn.setForeground(Theme.ACCENT);
-        signupBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        signupBtn.setContentAreaFilled(false);
-        signupBtn.setFocusPainted(false);
-        signupBtn.setOpaque(false);
-        signupBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        signupBtn.addActionListener(e -> onSignup.run());
+        JButton backBtn = new JButton("Login");
+        backBtn.setFont(Theme.BODY_FONT.deriveFont(11f));
+        backBtn.setForeground(Theme.ACCENT);
+        backBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        backBtn.setContentAreaFilled(false);
+        backBtn.setFocusPainted(false);
+        backBtn.setOpaque(false);
+        backBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        backBtn.addActionListener(e -> onBack.run());
 
-        signupRow.add(signupLabel);
-        signupRow.add(signupBtn);
+        backRow.add(backLabel);
+        backRow.add(backBtn);
 
         cardGbc.gridy = 4;
         cardGbc.insets = new Insets(10, 0, 0, 0);
-        card.add(signupRow, cardGbc);
+        card.add(backRow, cardGbc);
 
         center.add(card, new GridBagConstraints());
         add(center, BorderLayout.CENTER);
@@ -152,62 +139,53 @@ public class LoginPanel extends JPanel {
     public void reset() {
         nameField.setText("");
         passwordField.setText("");
+        confirmField.setText("");
     }
 
-    public void prefillName(String name) {
-        if (name == null) {
-            return;
-        }
-        nameField.setText(name.trim());
-    }
-
-    private void attemptLogin() {
+    private void attemptSignup() {
         String name = nameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
+        String confirm = new String(confirmField.getPassword()).trim();
 
-        if (name.isEmpty() || password.isEmpty()) {
+        if (name.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Nama dan password wajib diisi.",
-                    "Login Gagal",
+                    "Daftar Gagal",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (isAdminLogin(name, password)) {
-            onLogin.accept(Role.ADMIN, name);
-            return;
-        }
-
-        if (accountService.isAdminName(name)) {
+        if (!password.equals(confirm)) {
             JOptionPane.showMessageDialog(this,
-                    "Password admin tidak sesuai.",
-                    "Login Gagal",
+                    "Konfirmasi password tidak sama.",
+                    "Daftar Gagal",
                     JOptionPane.WARNING_MESSAGE);
-            passwordField.setText("");
+            confirmField.setText("");
             return;
         }
 
-        String memberName = accountService.authenticate(name, password);
-        if (memberName == null) {
-            String message = accountService.isEmpty()
-                    ? "Belum ada akun anggota. Silakan daftar."
-                    : "Nama atau password anggota tidak sesuai.";
+        try {
+            accountService.register(name, password);
+        } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this,
-                    message,
-                    "Login Gagal",
+                    ex.getMessage(),
+                    "Daftar Gagal",
                     JOptionPane.WARNING_MESSAGE);
-            passwordField.setText("");
+            return;
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Gagal menyimpan akun: " + ex.getMessage(),
+                    "Daftar Gagal",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        onLogin.accept(Role.MEMBER, memberName);
-    }
-
-    private boolean isAdminLogin(String name, String password) {
-        if (!ADMIN_PASS.equals(password)) {
-            return false;
-        }
-        return ADMIN_USER.equalsIgnoreCase(name);
+        JOptionPane.showMessageDialog(this,
+                "Akun berhasil dibuat. Silakan login.",
+                "Berhasil",
+                JOptionPane.INFORMATION_MESSAGE);
+        reset();
+        onSuccess.accept(name);
     }
 
     private JPanel buildField(String labelText, JTextField field) {
