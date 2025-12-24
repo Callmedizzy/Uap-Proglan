@@ -7,22 +7,16 @@ import app.service.PurchaseService;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AppFrame extends JFrame {
@@ -31,8 +25,13 @@ public class AppFrame extends JFrame {
     private final ListPanel listPanel;
     private final FormPanel formPanel;
     private final HistoryPanel historyPanel;
-    private final CardLayout cardLayout;
-    private final JPanel contentPanel;
+    private final CardLayout adminLayout;
+    private final JPanel adminContentPanel;
+    private final CardLayout rootLayout;
+    private final JPanel rootPanel;
+    private final JPanel adminPanel;
+    private final LoginPanel loginPanel;
+    private final MemberPanel memberPanel;
 
     public AppFrame() {
         super("E-Ticket Manager");
@@ -56,21 +55,30 @@ public class AppFrame extends JFrame {
         formPanel = new FormPanel(service, this::onFormSaved, this::showList);
         historyPanel = new HistoryPanel(service);
 
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel(cardLayout);
-        contentPanel.add(dashboardPanel, "dashboard");
-        contentPanel.add(listPanel, "list");
-        contentPanel.add(formPanel, "form");
-        contentPanel.add(historyPanel, "history");
+        adminLayout = new CardLayout();
+        adminContentPanel = new JPanel(adminLayout);
+        adminContentPanel.add(dashboardPanel, "dashboard");
+        adminContentPanel.add(listPanel, "list");
+        adminContentPanel.add(formPanel, "form");
+        adminContentPanel.add(historyPanel, "history");
 
-        JPanel main = new JPanel(new BorderLayout());
-        main.setBackground(Theme.BG);
-        main.add(buildSidebar(), BorderLayout.WEST);
-        main.add(contentPanel, BorderLayout.CENTER);
-        setContentPane(main);
+        adminPanel = new JPanel(new BorderLayout());
+        adminPanel.setBackground(Theme.BG);
+        adminPanel.add(buildSidebar(), BorderLayout.WEST);
+        adminPanel.add(adminContentPanel, BorderLayout.CENTER);
+
+        memberPanel = new MemberPanel(service, this::onMemberSaved, this::showLogin);
+        loginPanel = new LoginPanel(this::handleLogin);
+
+        rootLayout = new CardLayout();
+        rootPanel = new JPanel(rootLayout);
+        rootPanel.add(loginPanel, "login");
+        rootPanel.add(adminPanel, "admin");
+        rootPanel.add(memberPanel, "member");
+        setContentPane(rootPanel);
 
         refreshAll();
-        showDashboard();
+        showLogin();
     }
 
     private JPanel buildSidebar() {
@@ -102,61 +110,33 @@ public class AppFrame extends JFrame {
         side.add(formBtn);
         side.add(Box.createVerticalStrut(8));
         side.add(historyBtn);
+        JButton logoutBtn = navButton("Logout", e -> showLogin());
+        logoutBtn.setIcon(IconFactory.letterIcon("O", Theme.ACCENT_GREEN, Theme.TEXT_LIGHT));
+
         side.add(Box.createVerticalGlue());
+        side.add(logoutBtn);
 
         return side;
     }
 
     private JPanel buildBrandPanel() {
-        JPanel brand = new JPanel(new BorderLayout(10, 0));
+        JPanel brand = new JPanel();
         brand.setOpaque(false);
+        brand.setLayout(new BoxLayout(brand, BoxLayout.Y_AXIS));
 
-        JLabel logoLabel = new JLabel();
-        logoLabel.setPreferredSize(new Dimension(46, 46));
-        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        Icon logoIcon = loadLogoIcon();
-        if (logoIcon != null) {
-            logoLabel.setIcon(logoIcon);
-        } else {
-            logoLabel.setIcon(IconFactory.letterIcon("E", Theme.ACCENT_GREEN, Theme.TEXT_LIGHT));
-        }
-
-        JPanel textWrap = new JPanel();
-        textWrap.setOpaque(false);
-        textWrap.setLayout(new BoxLayout(textWrap, BoxLayout.Y_AXIS));
-
-        JLabel title = new JLabel("E-TICKET");
+        JLabel title = new JLabel("E - Ticket Pengajian");
         title.setForeground(Theme.TEXT_LIGHT);
         title.setFont(Theme.SUBTITLE_FONT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("Ticket Purchase");
+        JLabel subtitle = new JLabel("Ticket Purchase Pengajian");
         subtitle.setForeground(Theme.TEXT_LIGHT);
         subtitle.setFont(Theme.BODY_FONT);
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel crew = new JLabel("ketenganan jiwa");
-        crew.setForeground(Theme.TEXT_LIGHT);
-        crew.setFont(Theme.SMALL_FONT);
-
-        textWrap.add(title);
-        textWrap.add(subtitle);
-        textWrap.add(crew);
-
-        brand.add(logoLabel, BorderLayout.WEST);
-        brand.add(textWrap, BorderLayout.CENTER);
+        brand.add(title);
+        brand.add(subtitle);
         return brand;
-    }
-
-    private Icon loadLogoIcon() {
-        Path logoPath = Paths.get("resources", "images", "logo.png");
-        if (!Files.exists(logoPath)) {
-            return null;
-        }
-        ImageIcon icon = new ImageIcon(logoPath.toString());
-        if (icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0) {
-            return null;
-        }
-        Image scaled = icon.getImage().getScaledInstance(42, 42, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaled);
     }
 
     private JButton navButton(String label, java.awt.event.ActionListener listener) {
@@ -169,7 +149,7 @@ public class AppFrame extends JFrame {
 
     private void openForm(Purchase purchase) {
         formPanel.setPurchase(purchase);
-        cardLayout.show(contentPanel, "form");
+        adminLayout.show(adminContentPanel, "form");
     }
 
     private void onFormSaved() {
@@ -178,15 +158,43 @@ public class AppFrame extends JFrame {
     }
 
     private void showDashboard() {
-        cardLayout.show(contentPanel, "dashboard");
+        adminLayout.show(adminContentPanel, "dashboard");
     }
 
     private void showList() {
-        cardLayout.show(contentPanel, "list");
+        adminLayout.show(adminContentPanel, "list");
     }
 
     private void showHistory() {
-        cardLayout.show(contentPanel, "history");
+        adminLayout.show(adminContentPanel, "history");
+    }
+
+    private void showLogin() {
+        loginPanel.reset();
+        rootLayout.show(rootPanel, "login");
+    }
+
+    private void showAdmin() {
+        rootLayout.show(rootPanel, "admin");
+        showDashboard();
+    }
+
+    private void showMember() {
+        rootLayout.show(rootPanel, "member");
+    }
+
+    private void handleLogin(LoginPanel.Role role, String username) {
+        if (role == LoginPanel.Role.ADMIN) {
+            refreshAll();
+            showAdmin();
+        } else {
+            memberPanel.prepareFor(username);
+            showMember();
+        }
+    }
+
+    private void onMemberSaved() {
+        refreshAll();
     }
 
     private void refreshAll() {
